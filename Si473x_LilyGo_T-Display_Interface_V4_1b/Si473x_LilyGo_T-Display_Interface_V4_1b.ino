@@ -3024,6 +3024,7 @@ void showRDSStation() {
 //=======================================================================================
   if ((FirstLayer) or (ThirdLayer)) {
     tft.setCursor(XFreqDispl + 85, YFreqDispl - 7);
+    tft.print(stationName);
   }
   delay(250);
 }
