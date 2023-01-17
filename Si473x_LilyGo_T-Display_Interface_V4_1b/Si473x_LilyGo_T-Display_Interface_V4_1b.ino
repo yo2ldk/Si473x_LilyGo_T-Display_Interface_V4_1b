@@ -1,7 +1,10 @@
-//   This firmware is adapted by YO2LDK from Ralph Xavier, for the LilyGo T-Display with ESP32 S3,
-//    ST7789 driver res. 320/ 170
+//   This firmware is adapted by YO2LDK from Ralph Xavier, 
+//        for the LilyGo T-Display with ESP32 S3,
+//        ST7789V driver resolution 320/ 170
 
-//  V4.1a    Jan-22-2022 Screen re arrangement, my new layout for S-meter modified by Anonino Russo.
+//  V4.1b    Jan-17-2022 Screen re arrangement, battery support added (display was ON only on USB  -  on baterry was OFF)
+//           S-meter  have now  my new layout , based on another S-meter modified by Anonino Russo.
+//           
 //  V4.0    Jan-16-2022 New version based on Gert Baak's V3.4 sketch.
 
 //  * New user interface
@@ -124,18 +127,20 @@
 
 const uint16_t size_content = sizeof ssb_patch_content; 
 #define ESP32_I2C_SDA    18  
-#define ESP32_I2C_SCL    17  
+#define ESP32_I2C_SCL    17 
 #define RESET_PIN        43  
 #define ENCODER_PIN_A     1 
 #define ENCODER_PIN_B     2
 #define ENCODER_SWITCH    3
-#define displayon         1
+#define PIN_POWER_ON     46
+#define PIN_POWER_OFF     0
+#define displayon        15
 #define displayoff        0
 #define AUDIO_MUTE       16
 #define VBAT_MON          4
 #define MIN_USB_VOLTAGE  4.9
 #define CONV_FACTOR      1.8
-#define READS             44  
+#define READS            44  
 
 #define FM_BAND_TYPE 0
 #define MW_BAND_TYPE 1
@@ -873,18 +878,20 @@ void setup() {
   Serial.begin(115200);
   Serial.println(F("Initializing...."));
   pinMode(ENCODER_SWITCH, INPUT_PULLUP);
+   Wire.begin(ESP32_I2C_SDA, ESP32_I2C_SCL); //I2C for SI4735
 
   tft.init();
-  tft.writecommand(TFT_DISPOFF);
+  tft.writecommand(0x11);  
   tft.fillScreen(TFT_BLACK);
+  displayON(true);
+  pinMode(PIN_POWER_ON, OUTPUT);                                
+  digitalWrite(PIN_POWER_ON, HIGH);
+  pinMode(PIN_POWER_OFF, INPUT);                                
+  digitalWrite(PIN_POWER_OFF, LOW);   
 
-  Wire.begin(ESP32_I2C_SDA, ESP32_I2C_SCL); //I2C for SI4735
-  
-  int16_t si4735Addr = si4735.getDeviceI2CAddress(RESET_PIN);
-
-
+int16_t si4735Addr = si4735.getDeviceI2CAddress(RESET_PIN);
 #ifdef IhaveTDisplayTFT
-  tft.setRotation(1);
+  tft.setRotation(1);   // 3 = 180 degrees
 #endif
 
 
@@ -958,7 +965,7 @@ void setup() {
   tft.setCursor(0, 0);
   tft.println("SI4735 DSP SSB Radio");
   tft.println(" V4.1a 20-Jan-2023");
-  tft.setCursor(100, 60);
+  tft.setCursor(60, 60);
   tft.println("  Sketch: by  YO2LDK");
   tft.setCursor(0, 100);
   tft.println("Based on: PE0MGB & XAVIER");
@@ -1068,6 +1075,15 @@ void setup() {
 }// end setup
 //=======================================================================================
 //=======================================================================================
+
+//
+void displayON(bool v) {     
+  pinMode(displayon, OUTPUT);
+  digitalWrite(displayon, v);   
+  pinMode(PIN_POWER_ON, OUTPUT);
+  digitalWrite(PIN_POWER_ON, v);
+}
+//
 
 
 //=======================================================================================
@@ -1946,7 +1962,8 @@ void loop() {
     if (currentPRES < 0) currentPRES = lastPreset;
     previousPRES = currentPRES;
     DrawDispl();
-    tft.fillRect( XFreqDispl - 5, YFreqDispl + 47 , 275, 50, TFT_BLACK); 
+
+    tft.fillRect( XFreqDispl + 5, YFreqDispl + 47 , 265, 55, TFT_BLACK); 
     AGCfreqdisp();
     tft.setTextColor(TFT_YELLOW, TFT_BLACK );
     tft.setTextSize(2);
