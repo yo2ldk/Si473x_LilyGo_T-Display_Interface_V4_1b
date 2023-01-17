@@ -1,4 +1,13 @@
-**V4.1    Jan-22-2022 Battery Indicator.**
+                                              This firmware is adapted by YO2LDK from Ralph Xavier, 
+                                                    for the LilyGo T-Display with ESP32 S3,
+                                                      ST7789V driver resolution 320/ 170
+                                                      
+                                                      
+
+ V4.1b    Jan-17-2022 Screen re arrangement, battery support added (display was ON only on USB  -  with baterry only was OFF)
+          S-meter  have now  my new layout (used also in the others sketchs for 4 inch ILI9488 display), 
+          based on another S-meter modified by Anonino Russo.
+           
 
 **V4.0    Jan-16-2022 New version based on Gert Baak's V3.4 sketch.**
 
